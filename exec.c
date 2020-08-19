@@ -59,10 +59,11 @@ exec(char *path, char **argv)
   iunlockput(ip);
   end_op();
   ip = 0;
-
+  
   sz = PGROUNDUP(sz);
-
+  //lab3
   uint ustackbase = KERNBASE -4;
+  //cprintf("%d\n", ustackbase);
   sp = allocuvm(pgdir, ustackbase - PGSIZE, ustackbase);
   if(!sp)
     goto bad;
@@ -75,7 +76,7 @@ exec(char *path, char **argv)
   if((sz = allocuvm(pgdir, sz, sz + 2*PGSIZE)) == 0)
     goto bad;
   clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
-  sp = sz;
+  //sp = sz;      //lab3
 
   // Push argument strings, prepare rest of stack in ustack.
   for(argc = 0; argv[argc]; argc++) {

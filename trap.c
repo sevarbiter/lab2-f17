@@ -46,7 +46,25 @@ trap(struct trapframe *tf)
     return;
   }
 
+  uint lowAddress, highAddress, faultyAddress;
+
   switch(tf->trapno){
+  case T_PGFLT:
+    highAddress = KERNBASE - (myproc()->userStack_pages*PGSIZE); //lab3
+    lowAddress = highAddress - PGSIZE; //lab3
+    faultyAddress = rcr2();
+
+    if(faultyAddress > lowAddress && faultyAddress < highAddress)
+    {
+      if(!allocuvm(myproc()->pgdir, lowAddress, highAddress)) //lab3
+        goto Default;
+      myproc()->userStack_pages++;
+      cprintf("Current top of user stack: %x\n", KERNBASE -(myproc()->userStack_pages*PGSIZE));
+    }
+    else {
+      goto Default;
+    }
+    break;
   case T_IRQ0 + IRQ_TIMER:
     if(cpuid() == 0){
       acquire(&tickslock);
@@ -79,6 +97,7 @@ trap(struct trapframe *tf)
     break;
 
   //PAGEBREAK: 13
+  Default:
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
       // In kernel, it must be our mistake.

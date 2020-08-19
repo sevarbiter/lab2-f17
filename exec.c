@@ -60,6 +60,15 @@ exec(char *path, char **argv)
   end_op();
   ip = 0;
 
+  sz = PGROUNDUP(sz);
+
+  uint ustackbase = KERNBASE -4;
+  sp = allocuvm(pgdir, ustackbase - PGSIZE, ustackbase);
+  if(!sp)
+    goto bad;
+
+  curproc->userStack_pages = 1;
+
   // Allocate two pages at the next page boundary.
   // Make the first inaccessible.  Use the second as the user stack.
   sz = PGROUNDUP(sz);
